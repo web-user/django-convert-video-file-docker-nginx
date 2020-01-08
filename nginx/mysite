@@ -1,0 +1,30 @@
+server {
+  # use 'listen 80 deferred;' for Linux
+  # use 'listen 80 accept_filter=httpready;' for FreeBSD
+  listen 8081;
+  server_name django-convert-video-file_nginx;
+  charset utf-8;
+  client_max_body_size 500m;
+
+
+  location /user/profiles/upload {
+      # profile images should be no more than 2m
+      client_max_body_size 500m;
+      # the rest of your website will still use 1m max body size
+  }
+  
+   location / {
+      # checks for static file, if not found proxy to app
+      try_files $uri @proxy_to_app;
+  }
+
+  # django app
+   location @proxy_to_app {
+      proxy_redirect     off;
+      proxy_set_header   Host $host;
+      proxy_set_header   X-Real-IP $remote_addr;
+      proxy_set_header   X-Forwarded-For $proxy_add_x_forwarded_for;
+      proxy_set_header   X-Forwarded-Host $server_name;
+      proxy_pass http://web:8000;
+  }
+}

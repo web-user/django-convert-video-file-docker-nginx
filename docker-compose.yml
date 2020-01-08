@@ -1,0 +1,26 @@
+web:
+    build: app
+    restart: always
+    command: sh -c 'cd app/convertfile  && python manage.py collectstatic --no-input && gunicorn --workers=3 --bind 0.0.0.0:8000 convertfile.wsgi:application --timeout 28'
+    volumes:
+        - .:/dockyard
+        - static:/dockyard/static
+        - media:/dockyard/media
+    links:
+        - db
+    expose:
+        - "8000"
+
+
+
+db:
+    image: postgres
+
+nginx:
+    build: nginx
+    restart: always
+    ports:
+        - "8081:8081"
+    links:
+        - web
+
